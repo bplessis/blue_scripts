@@ -1,0 +1,17 @@
+#!/bin/bash
+
+name=$1
+shift 1
+
+arg=$1
+shift 1
+
+while [ $# -ne 0 ]
+do
+  arg="$arg,$1"
+  shift 1
+done
+
+echo "Creating $name from $arg ... "
+
+pacmd load-module module-combine-sink sink_name=$name slaves=$arg

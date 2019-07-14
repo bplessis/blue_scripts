@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "Removing module: $1"
+pactl unload-module $1
+

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+bluetoothctl power on
+bluetoothctl disconnect 78:44:05:CC:B0:BB

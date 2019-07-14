@@ -1,0 +1,9 @@
+#!/bin/bash
+
+sink_name="$1_output"
+
+echo "Adding null sink: $sink_name"
+pactl load-module module-null-sink sink_name=$sink_name sink_properties=device.description="$sink_name"
+
+echo "Adding loopback:"
+pactl load-module module-loopback source=$sink_name.monitor

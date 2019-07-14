@@ -1,0 +1,3 @@
+#!/bin/bash
+
+pacmd list-modules | grep -e "index" -e "name:"
