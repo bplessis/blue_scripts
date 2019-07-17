@@ -13,6 +13,7 @@ CURATED_TAGS="./.tags.cur"
 
 
 rm -f $FILE_TAGS 
+rm -f $CURATED_TAGS
 rm -f $FILE_PROTOTYPE 
 rm -f $FILE_STRUCT
 rm -f $FILE_MACRO
@@ -98,3 +99,14 @@ while read p; do
       echo "syn keyword cLibVariable $p" >> $OUTPUT_FILE  
 done < $FILE_VARIABLE
 echo " " >> $OUTPUT_FILE
+
+rm -f $FILE_TAGS 
+rm -f $CURATED_TAGS
+rm -f $FILE_PROTOTYPE 
+rm -f $FILE_STRUCT
+rm -f $FILE_MACRO
+rm -f $FILE_ENUM
+rm -f $FILE_ENUMERATOR 
+rm -f $FILE_MEMBER
+rm -f $FILE_VARIABLE
+
