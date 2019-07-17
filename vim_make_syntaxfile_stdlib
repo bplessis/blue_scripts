@@ -1,0 +1,57 @@
+#!/bin/bash
+
+CPP_OUTPUT=".cpp_output"
+
+FILES=( assert\
+        complex\
+        ctype\
+        errno\
+        fenv\
+        float\
+        inttypes\
+        iso646\
+        limits\
+        locale\
+        math\
+        setjmp\
+        signal\
+        stdalign\
+        stdarg\
+        stdatomic\
+        stdbool\
+        stddef\
+        stdint\
+        stdio\
+        stdlib\
+        stdnoreturn\
+        string\
+        tgmath\
+        threads\
+        time\
+        uchar\
+        wchar\
+        wctype)
+
+
+LC_ALL='C' cpp -v /dev/null -o /dev/null 2> $CPP_OUTPUT
+sed -i '/<\.\.\.>/,$!d' $CPP_OUTPUT
+sed -i '1d' $CPP_OUTPUT
+sed -i '/End/Q' $CPP_OUTPUT
+
+mapfile -t FOLDERS < $CPP_OUTPUT
+
+for file in "${FILES[@]}"
+do
+    for folder in "${FOLDERS[@]}"
+    do
+        FILEPATH="$folder/$file.h"
+        if [ -f $FILEPATH ]
+        then
+            echo "found : $FILEPATH"
+            vim_make_syntaxfile "$FILEPATH" stdlib_$file
+            break
+        fi
+    done
+done
+
+rm $CPP_OUTPUT
