@@ -1,0 +1,98 @@
+#!/bin/bash
+
+LOG_FILE="/tmp/upgrade_msg.txt"
+
+rm -fr $LOG_FILE
+
+echo "Subject: Update system" &>> $LOG_FILE
+echo " " &>> $LOG_FILE
+
+echo "*******************************************" &>> $LOG_FILE
+echo "*** emerge --sync" &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo " " &>> $LOG_FILE
+
+emerge --sync &>> $LOG_FILE
+
+
+echo " " &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo "*** emerge --oneshot --update portage" &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo " " &>> $LOG_FILE
+
+emerge --oneshot --update portage &>> $LOG_FILE
+
+
+echo " " &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo "*** layman -S" &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo " " &>> $LOG_FILE
+
+layman -S &>> $LOG_FILE
+
+
+echo " " &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo "*** emerge -uvDN world" &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo " " &>> $LOG_FILE
+
+emerge -uvDN --exclude lrzsz @world &>> $LOG_FILE
+
+
+echo " " &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo "*** emerge @preserved-rebuild" &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo " " &>> $LOG_FILE
+
+emerge @preserved-rebuild &>> $LOG_FILE
+
+
+echo " " &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo "*** etc-update" &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo " " &>> $LOG_FILE
+
+echo -1 | etc-update &>> $LOG_FILE
+
+
+echo " " &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo "*** revdep-rebuild" &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo " " &>> $LOG_FILE
+
+revdep-rebuild &>> $LOG_FILE
+
+
+echo " " &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo "*** perl-cleaner" &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo " " &>> $LOG_FILE
+
+perl-cleaner --all &>> $LOG_FILE
+revdep-rebuild &>> $LOG_FILE
+
+echo " " &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo "*** emerge -c" &>> $LOG_FILE
+echo "*******************************************" &>> $LOG_FILE
+echo " " &>> $LOG_FILE
+
+emerge -c &>> $LOG_FILE
+
+echo " " &>> $LOG_FILE
+echo " " &>> $LOG_FILE
+echo "***" &>> $LOG_FILE
+echo "*** FINISHED" &>> $LOG_FILE
+echo "***" &>> $LOG_FILE
+
+cat $LOG_FILE | msmtp sebastien@homedruon.com
+
+
+
