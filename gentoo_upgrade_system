@@ -35,11 +35,11 @@ layman -S &>> $LOG_FILE
 
 echo " " &>> $LOG_FILE
 echo "*******************************************" &>> $LOG_FILE
-echo "*** emerge -uvDN world" &>> $LOG_FILE
+echo "*** emerge -uvDN -q world" &>> $LOG_FILE
 echo "*******************************************" &>> $LOG_FILE
 echo " " &>> $LOG_FILE
 
-emerge -uvDN --exclude lrzsz @world &>> $LOG_FILE
+emerge -uvDN -q --exclude lrzsz @world &>> $LOG_FILE
 
 
 echo " " &>> $LOG_FILE
@@ -92,7 +92,7 @@ echo "***" &>> $LOG_FILE
 echo "*** FINISHED" &>> $LOG_FILE
 echo "***" &>> $LOG_FILE
 
-cat $LOG_FILE | msmtp sebastien@homedruon.com
+cat $LOG_FILE | sendmail sebastien@homedruon.com
 
 
 
