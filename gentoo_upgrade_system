@@ -1,98 +1,120 @@
 #!/bin/bash
 
-LOG_FILE="/tmp/upgrade_msg.txt"
+tempfiles=( )
+function cleanup() {
+    $RM -f "${tempfiles[@]}"
+}
+trap cleanup 0
 
-rm -fr $LOG_FILE
+if ! $DEBUG; then
+  # Start log interception
+  log=`mktemp`
+  tempfiles += ( "$log" )
+  exec &> $log
+fi
 
-echo "Subject: Update system" &>> $LOG_FILE
-echo " " &>> $LOG_FILE
+echo "Subject: Update system"
+echo " "
 
-echo "*******************************************" &>> $LOG_FILE
-echo "*** emerge --sync" &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo " " &>> $LOG_FILE
+echo "*******************************************"
+echo "*** emerge --sync"
+echo "*******************************************"
+echo " "
 
-emerge --sync &>> $LOG_FILE
-
-
-echo " " &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo "*** emerge --oneshot --update portage" &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo " " &>> $LOG_FILE
-
-emerge --oneshot --update portage &>> $LOG_FILE
-
-
-echo " " &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo "*** layman -S" &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo " " &>> $LOG_FILE
-
-layman -S &>> $LOG_FILE
+emerge --sync
 
 
-echo " " &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo "*** emerge -uvDN -q world" &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo " " &>> $LOG_FILE
+echo " "
+echo "*******************************************"
+echo "*** emerge --oneshot --update portage"
+echo "*******************************************"
+echo " "
 
-emerge -uvDN -q --exclude lrzsz @world &>> $LOG_FILE
-
-
-echo " " &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo "*** emerge @preserved-rebuild" &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo " " &>> $LOG_FILE
-
-emerge @preserved-rebuild &>> $LOG_FILE
+emerge --oneshot --update portage
 
 
-echo " " &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo "*** etc-update" &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo " " &>> $LOG_FILE
+echo " "
+echo "*******************************************"
+echo "*** layman -S"
+echo "*******************************************"
+echo " "
 
-echo -1 | etc-update &>> $LOG_FILE
-
-
-echo " " &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo "*** revdep-rebuild" &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo " " &>> $LOG_FILE
-
-revdep-rebuild &>> $LOG_FILE
+layman -S
 
 
-echo " " &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo "*** perl-cleaner" &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo " " &>> $LOG_FILE
+echo " "
+echo "*******************************************"
+echo "*** emerge -uvDN -q world"
+echo "*******************************************"
+echo " "
 
-perl-cleaner --all &>> $LOG_FILE
-revdep-rebuild &>> $LOG_FILE
-
-echo " " &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo "*** emerge -c" &>> $LOG_FILE
-echo "*******************************************" &>> $LOG_FILE
-echo " " &>> $LOG_FILE
-
-emerge -c &>> $LOG_FILE
-
-echo " " &>> $LOG_FILE
-echo " " &>> $LOG_FILE
-echo "***" &>> $LOG_FILE
-echo "*** FINISHED" &>> $LOG_FILE
-echo "***" &>> $LOG_FILE
-
-cat $LOG_FILE | sendmail sebastien@homedruon.com
+emerge -uvDN -q --exclude lrzsz @world
 
 
+echo " "
+echo "*******************************************"
+echo "*** emerge @preserved-rebuild"
+echo "*******************************************"
+echo " "
 
+emerge @preserved-rebuild
+
+
+echo " "
+echo "*******************************************"
+echo "*** etc-update"
+echo "*******************************************"
+echo " "
+
+echo -1 | etc-update
+
+
+echo " "
+echo "*******************************************"
+echo "*** revdep-rebuild"
+echo "*******************************************"
+echo " "
+
+revdep-rebuild
+
+
+echo " "
+echo "*******************************************"
+echo "*** perl-cleaner"
+echo "*******************************************"
+echo " "
+
+perl-cleaner --all
+revdep-rebuild
+
+echo " "
+echo "*******************************************"
+echo "*** emerge -c"
+echo "*******************************************"
+echo " "
+
+emerge -c
+
+echo " " 
+echo " "
+echo "***"
+echo "*** FINISHED"
+echo "***"
+
+if ! $DEBUG; then
+  # ferme le fichier de log
+  exec &>/dev/null
+  SUBJECT="$(hostname): Recap upgrade gentoo"
+  MAILTO="To: sebastien@homedruon.com"
+
+  PRECONTENT="From: Automated Gentoo Updated <gentoo-updater>\nSubject: $SUBJECT\n$MAILTO"
+  POSTCONTENT="\n\nKindly,\n-- \nThe Gentoo Updater on\n"`hostname -f`"\n."
+
+  mail=`mktemp`
+  tempfiles+=( "$mail" )
+  echo -e $PRECONTENT > $mail
+  /bin/cat $log >> $mail
+  echo -e $POSTCONTENT >> $mail
+
+  /bin/cat $mail | /usr/sbin/sendmail -t
+fi
